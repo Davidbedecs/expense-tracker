@@ -1,0 +1,91 @@
+<div class="container mt-4">
+  <h2>Listák kezelése</h2>
+
+  <!-- Új lista létrehozása -->
+  <form (ngSubmit)="addList()" class="row g-2 mb-4">
+    <div class="col-md-6">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Új lista neve (pl. 05.13)"
+        [(ngModel)]="newListName"
+        name="listName"
+      />
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-primary w-100" type="submit">Lista létrehozása</button>
+    </div>
+  </form>
+
+  <div class="row">
+    <div class="col-md-4">
+      <ul class="list-group">
+        <li
+          *ngFor="let list of lists"
+          class="list-group-item list-group-item-action"
+          [class.active]="list.id === selectedListId"
+          (click)="selectList(list.id)"
+        >
+          {{ list.name }}
+        </li>
+      </ul>
+    </div>
+
+    <div class="col-md-8" *ngIf="selectedListId !== null">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="mt-2 mb-0">Tételek ebben a listában</h4>
+        <button class="btn btn-outline-danger btn-sm" (click)="deleteSelectedList()">Lista törlése</button>
+      </div>
+
+      <!-- Kereshető termékválasztó + darabszám -->
+      <div class="mb-3 d-flex align-items-center gap-2">
+        <input class="form-control"
+               list="productOptions"
+               [(ngModel)]="selectedItemName"
+               placeholder="Kezdj el gépelni a termék nevét..." />
+
+        <datalist id="productOptions">
+          <option *ngFor="let item of availableItems" [value]="item.name">
+            {{ item.name }} – {{ item.amount }} Ft
+          </option>
+        </datalist>
+
+        <input type="number"
+               class="form-control w-25"
+               [(ngModel)]="selectedItemQuantity"
+               min="1"
+               placeholder="Db" />
+
+        <button class="btn btn-success" (click)="addItemByName()" [disabled]="!selectedItemName">
+          Hozzáadás
+        </button>
+      </div>
+
+      <!-- Tételek listája -->
+      <ul class="list-group mb-3">
+        <li class="list-group-item d-flex justify-content-between align-items-center"
+            *ngFor="let item of selectedListItems">
+          <div>
+            {{ item.name }}
+            <span class="text-muted">({{ item.quantity }} db)</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span [ngClass]="{
+              'text-success': item.category === 'Bevétel',
+              'text-danger': item.category !== 'Bevétel'
+            }">
+              {{ (item.category === 'Bevétel' ? 1 : -1) * item.amount * item.quantity }} Ft
+            </span>
+            <button class="btn btn-sm btn-outline-danger" (click)="removeItemFromSelectedList(item.id)">
+              ✕
+            </button>
+          </div>
+        </li>
+      </ul>
+
+      <div class="fw-bold fs-5">
+        Végösszeg: {{ getTotal() | number: '1.0-0' }} Ft
+      </div>
+    </div>
+  </div>
+</div>
